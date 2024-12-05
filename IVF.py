@@ -1,11 +1,10 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from heapq import heappush, heappop
 import os
 from utils import *
 
 class IVF:
-    def __init__(self,original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
+    def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
         self.data_size = data_size 
         self.n_clusters = n_clusters
         self.n_probs = n_probs
@@ -30,7 +29,7 @@ class IVF:
 
     def train(self):
         print("Training IVF index...")
-        data = read_database(self.original_data_path,self.data_size,self.dimension)
+        data = read_database(self.original_data_path, self.data_size,self.dimension)
         print(data)
         print("--------------------------------------------------")
         kmeans = KMeans(n_clusters=self.n_clusters, random_state=42)
@@ -50,21 +49,35 @@ class IVF:
     def retrieve(self, query,top_k):
         self.centroids=read_centroids_file(os.path.join(self.main_directory_path, self.centroids_file_path),self.dimension)
         # print(self.centroids,query)
-        print(read_one_embedding(self.original_data_path,2,self.dimension))
-        # query_dot_centroids = np.argsort(self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids) * np.linalg.norm(query))).squeeze().tolist()[::-1]
+        # print(read_one_embedding(self.original_data_path,2,self.dimension))
+        query_dot_centroids = np.argsort(self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids) * np.linalg.norm(query))).squeeze().tolist()[::-1]
        
-        # top_scores = query_dot_centroids[:self.n_probs]
+        top_scores = query_dot_centroids[:self.n_probs]
 
-        # top_k_embeddings = []
-        # for score in top_scores:
-        #     embeddings = []
-        #     vec_indexes = read_one_cluster(score,os.path.join(self.main_directory_path, self.clusters_file_path),os.path.join(self.main_directory_path, self.cluster_start_pos_file_path),self.n_clusters,self.data_size)
-        #     for id in vec_indexes:
-        #         embeddings.append(read_one_embedding(self.original_data_path,id,self.dimension))
-        #     query_dot_embedding = np.argsort(embeddings.dot(query.T).T / (np.linalg.norm(embeddings) * np.linalg.norm(query))).squeeze().tolist()[::-1]
-        #     top_k_embeddings.append(query_dot_embedding[:top_k])
-        
-        # return sorted(top_k_embeddings, reverse=True)[:top_k]
+        top_k_embeddings = []
+        for score in top_scores:
+            embeddings = []
+            vec_indexes = read_one_cluster(score,os.path.join(self.main_directory_path, self.clusters_file_path),os.path.join(self.main_directory_path, self.cluster_start_pos_file_path),self.n_clusters,self.data_size)
+            for id in vec_indexes:
+                embeddings.append(read_one_embedding(self.original_data_path,id,self.dimension))
+            embeddings = np.array(embeddings)
+            query_dot_embedding = np.argsort(embeddings.dot(query.T) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query)))[::-1]
+            for i in range(top_k):
+                if i < len(query_dot_embedding):
+                    top_k_embeddings.append(embeddings[query_dot_embedding[i]])
+                else: 
+                    break
+        print("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+        # Sort based on the similarity to the query, if needed
+        top_k_embeddings = np.array(top_k_embeddings)
+        similarity_scores = top_k_embeddings.dot(query.T) / (np.linalg.norm(top_k_embeddings, axis=1) * np.linalg.norm(query))
+        sorted_indices = np.argsort(similarity_scores)[::-1]
+        res=[]
+        for i in range(top_k):
+            if i < len(sorted_indices):
+                res.append(top_k_embeddings[sorted_indices[i]])
+        print(res)
+        return res
 
 
 

@@ -60,8 +60,11 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,3,2,70,self.db_size)
-        ivf.retrieve(query[0],3)
+        ivf = IVF(self.db_path,3,3,70,self.db_size)
+        res=[]
+        for q in query:
+            res.append(ivf.retrieve(q,3))
+        return res
         # scores = []
         # num_records = self._get_num_records()
         # # here we assume that the row number is the ID of each vector
@@ -85,7 +88,7 @@ class VecDB:
         ivf.train()
 
 
-ivf = IVF("./saved_db.dat",3,2,70,10)
-ivf.train()
-query = np.random.random((1,70))
-ivf.retrieve(query,3)        
+# ivf = IVF("./saved_db.dat",3,2,70,10)
+# ivf.train()
+# query = np.random.random((1,70))
+# ivf.retrieve(query,3)        

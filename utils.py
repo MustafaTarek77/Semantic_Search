@@ -90,7 +90,3 @@ def read_one_embedding(original_data_path,row_id,vec_size):
         embedding= struct.unpack(f'{vec_size}f', packed_data)
             
     return np.array(embedding, dtype=np.float32)
-    
-
-def read_clusters_file():
-    pass
