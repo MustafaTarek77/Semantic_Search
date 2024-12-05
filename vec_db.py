@@ -60,8 +60,8 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(3,2,70,self.db_size)
-        ivf.retrieve(query[0])
+        ivf = IVF(self.db_path,3,2,70,self.db_size)
+        ivf.retrieve(query[0],3)
         # scores = []
         # num_records = self._get_num_records()
         # # here we assume that the row number is the ID of each vector
@@ -81,5 +81,11 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(3,2,70,self.db_size)
-        ivf.train(self.db_path)
+        ivf = IVF(self.db_path,3,2,70,self.db_size)
+        ivf.train()
+
+
+ivf = IVF("./saved_db.dat",3,2,70,10)
+ivf.train()
+query = np.random.random((1,70))
+ivf.retrieve(query,3)        

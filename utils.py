@@ -10,7 +10,7 @@ def read_database(original_data_path, data_size, vec_size):
             position = row_id * (vec_size * 4)
             # Seek to the position of the row
             file.seek(position)
-            # Read the row with size of one row (ID + vec_size * floats)
+            # Read the row with size of one row (ID + vec_size * floats)s
             packed_data = file.read(vec_size * 4)
             data.append(struct.unpack(f'{vec_size}f', packed_data))
             
@@ -81,6 +81,16 @@ def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_
                 vec_indexes.append(data)
 
     return vec_indexes
+
+def read_one_embedding(original_data_path,row_id,vec_size):
+    with open(original_data_path, 'rb') as file:
+        position = row_id * (vec_size*4)
+        file.seek(position)
+        packed_data = file.read(vec_size * 4)
+        embedding= struct.unpack(f'{vec_size}f', packed_data)
+            
+    return np.array(embedding, dtype=np.float32)
+    
 
 def read_clusters_file():
     pass
