@@ -11,6 +11,7 @@ class VecDB:
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "index.dat", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
+        self.db_size= db_size
         if new_db:
             if db_size is None:
                 raise ValueError("You need to provide the size of the database")
@@ -59,16 +60,18 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        scores = []
-        num_records = self._get_num_records()
-        # here we assume that the row number is the ID of each vector
-        for row_num in range(num_records):
-            vector = self.get_one_row(row_num)
-            score = self._cal_score(query, vector)
-            scores.append((score, row_num))
-        # here we assume that if two rows have the same score, return the lowest ID
-        scores = sorted(scores, reverse=True)[:top_k]
-        return [s[1] for s in scores]
+        ivf = IVF(3,2,70,self.db_size)
+        ivf.retrieve(query[0])
+        # scores = []
+        # num_records = self._get_num_records()
+        # # here we assume that the row number is the ID of each vector
+        # for row_num in range(num_records):
+        #     vector = self.get_one_row(row_num)
+        #     score = self._cal_score(query, vector)
+        #     scores.append((score, row_num))
+        # # here we assume that if two rows have the same score, return the lowest ID
+        # scores = sorted(scores, reverse=True)[:top_k]
+        # return [s[1] for s in scores]
     
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)
@@ -78,5 +81,5 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf= IVF(100,100,70,10**6)
-        ivf.train()
+        ivf = IVF(3,2,70,self.db_size)
+        ivf.train(self.db_path)
