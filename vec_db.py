@@ -6,6 +6,8 @@ from IVF import *
 DB_SEED_NUMBER = 42
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
+NCLUSTERS = 500
+NPROBS = 5
 
 class VecDB:
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "index.dat", new_db = True, db_size = None) -> None:
@@ -60,22 +62,10 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,3,3,70,self.db_size)
-        res=[]
-        for q in query:
-            res.append(ivf.retrieve(q,3))
-        return res
-        # scores = []
-        # num_records = self._get_num_records()
-        # # here we assume that the row number is the ID of each vector
-        # for row_num in range(num_records):
-        #     vector = self.get_one_row(row_num)
-        #     score = self._cal_score(query, vector)
-        #     scores.append((score, row_num))
-        # # here we assume that if two rows have the same score, return the lowest ID
-        # scores = sorted(scores, reverse=True)[:top_k]
-        # return [s[1] for s in scores]
-    
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
+
+        return ivf.retrieve(query,top_k)
+
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)
         norm_vec1 = np.linalg.norm(vec1)
@@ -84,11 +74,7 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(self.db_path,3,2,70,self.db_size)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
         ivf.train()
-
-
-# ivf = IVF("./saved_db.dat",3,2,70,10)
-# ivf.train()
-# query = np.random.random((1,70))
-# ivf.retrieve(query,3)        
+        
+        return
