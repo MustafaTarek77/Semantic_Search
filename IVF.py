@@ -44,7 +44,7 @@ class IVF:
         return
     
     def retrieve(self, query,top_k):
-        self.centroids=read_centroids_file(os.path.join(self.main_directory_path, self.centroids_file_path),self.dimension)
+        self.centroids=read_centroids_file(os.path.join(self.main_directory_path, self.centroids_file_path),self.dimension,self.index_file_path)
         
         query_dot_centroids = np.argsort(self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids) * np.linalg.norm(query))).squeeze().tolist()[::-1]
        
