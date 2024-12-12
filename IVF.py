@@ -12,9 +12,9 @@ class IVF:
         self.original_data_path = original_data_path
         self.clusters = {i: [] for i in range(n_clusters)}  # Dict to store cluster vectors
         self.centroids = []  # Centroids of the clusters
-        self.clusters_file_path = "Data_" + str(data_size) + ".bin"
-        self.cluster_start_pos_file_path = "ClusterStartPos_" + str(data_size) + ".bin"
-        self.centroids_file_path = "Centroids_" + str(data_size) + ".bin"
+        self.clusters_file_path = "Data.bin"
+        self.cluster_start_pos_file_path = "ClusterStartPos.bin"
+        self.centroids_file_path = "Centroids.bin"
         
         folder_name='./Databases'
         if not os.path.exists(folder_name):
