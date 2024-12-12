@@ -4,7 +4,7 @@ import os
 from utils import *
 
 class IVF:
-    def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
+    def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int, index_file_path: str):
         self.data_size = data_size 
         self.n_clusters = n_clusters
         self.n_probs = n_probs
@@ -16,11 +16,10 @@ class IVF:
         self.cluster_start_pos_file_path = "ClusterStartPos_" + str(data_size) + ".bin"
         self.centroids_file_path = "Centroids_" + str(data_size) + ".bin"
         
-        folder_name='./Databases'
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
+        if not os.path.exists(index_file_path):
+            os.makedirs(index_file_path)
 
-        size_folder = os.path.join(folder_name, str(data_size))
+        size_folder = os.path.join(index_file_path, str(data_size))
         if not os.path.exists(size_folder):
             os.makedirs(size_folder)
 
