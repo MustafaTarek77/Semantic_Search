@@ -10,6 +10,7 @@ class IVF:
         self.n_probs = n_probs
         self.dimension = dimension
         self.original_data_path = original_data_path
+        self.index_file_path = index_file_path
         self.clusters = {i: [] for i in range(n_clusters)}  # Dict to store cluster vectors
         self.centroids = []  # Centroids of the clusters
         self.clusters_file_path = "Data_" + str(data_size) + ".bin"
