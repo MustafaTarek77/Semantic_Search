@@ -62,7 +62,7 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_file_path)
 
         return ivf.retrieve(query,top_k)
 
