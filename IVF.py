@@ -45,7 +45,7 @@ class IVF:
         return
     
     def retrieve(self, query,top_k):
-        self.centroids=read_centroids_file(os.path.join(self.main_directory_path, self.centroids_file_path),self.dimension,self.index_file_path)
+        self.centroids=read_centroids_file(os.path.join(self.index_file_path, self.centroids_file_path),self.dimension)
         
         query_dot_centroids = np.argsort(self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids) * np.linalg.norm(query))).squeeze().tolist()[::-1]
        
@@ -53,7 +53,7 @@ class IVF:
 
         top_k_embeddings = []
         for score in top_scores:
-            vec_indexes = read_one_cluster(score,os.path.join(self.main_directory_path, self.clusters_file_path),os.path.join(self.main_directory_path, self.cluster_start_pos_file_path),self.n_clusters,self.data_size)
+            vec_indexes = read_one_cluster(score,os.path.join(self.index_file_path, self.clusters_file_path),os.path.join(self.index_file_path, self.cluster_start_pos_file_path),self.n_clusters,self.data_size)
             for id in vec_indexes:
                 embedding = read_one_embedding(self.original_data_path,id,self.dimension)
                 query_dot_embedding = embedding.dot(query.T) / (np.linalg.norm(embedding) * np.linalg.norm(query))
