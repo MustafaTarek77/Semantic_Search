@@ -74,7 +74,7 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_file_path)
         ivf.train()
         
         return
