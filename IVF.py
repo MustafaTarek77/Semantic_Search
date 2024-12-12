@@ -52,7 +52,7 @@ class IVF:
 
         top_k_embeddings = []
         for score in top_scores:
-            vec_indexes_batch_generator = read_one_cluster(score, os.path.join(index_path, self.clusters_file_path), os.path.join(index_path, self.cluster_start_pos_file_path), self.n_clusters,self.data_size)            
+            vec_indexes = read_one_cluster(score, os.path.join(index_path, self.clusters_file_path), os.path.join(index_path, self.cluster_start_pos_file_path), self.n_clusters,self.data_size)            
             for id in vec_indexes:
                 embedding = read_one_embedding(self.original_data_path,id,self.dimension)
                 query_dot_embedding = embedding.dot(query.T) / (np.linalg.norm(embedding) * np.linalg.norm(query))
