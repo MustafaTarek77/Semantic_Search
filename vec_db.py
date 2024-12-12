@@ -62,7 +62,7 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_file_path)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_path)
 
         return ivf.retrieve(query,top_k)
 
@@ -74,7 +74,7 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_file_path)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_path)
         ivf.train()
         
         return
