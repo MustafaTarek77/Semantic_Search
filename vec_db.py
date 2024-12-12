@@ -10,7 +10,7 @@ NCLUSTERS = 500
 NPROBS = 5
 
 class VecDB:
-    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "index.dat", new_db = True, db_size = None) -> None:
+    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "saved_db_1m", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
         self.db_size= db_size
@@ -62,9 +62,9 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_path)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
 
-        return ivf.retrieve(query,top_k)
+        return ivf.retrieve(query,top_k,index_path=self.index_path)
 
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)
@@ -74,7 +74,7 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size,self.index_path)
+        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
         ivf.train()
         
         return
