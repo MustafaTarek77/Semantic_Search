@@ -3,6 +3,7 @@ from sklearn.cluster import KMeans
 import os
 from utils import *
 import heapq
+from concurrent.futures import ThreadPoolExecutor
 
 class IVF:
     def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
@@ -46,21 +47,19 @@ class IVF:
         return
         
     def retrieve(self, query, top_k, index_path=None, batch_size=50000):
-        self.centroids = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)        
-
+        self.centroids = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
 
         # Compute similarities with centroids
         query_dot_centroids = np.argsort(
             self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids, axis=1) * np.linalg.norm(query))
         ).squeeze().tolist()[::-1]
-        
 
         top_scores = query_dot_centroids[:self.n_probs]
 
         # Use a min-heap to store only the top-k embeddings
         heap = []
 
-        for score in top_scores:
+        def process_cluster(score):
             vec_indexes = list(read_one_cluster(
                 score,
                 os.path.join(index_path, self.clusters_file_path),
@@ -69,15 +68,17 @@ class IVF:
                 self.data_size
             ))
 
-            # Process in batches
-            for i in range(0, len(vec_indexes), batch_size):
-                batch = vec_indexes[i:i+batch_size]
-                embeddings = []
-                for id in batch:
-                    embedding = read_one_embedding(self.original_data_path, id, self.dimension)
-                    embeddings.append((embedding, id))
+            embeddings = []
+            for id in vec_indexes:
+                embedding = read_one_embedding(self.original_data_path, id, self.dimension)
+                embeddings.append((embedding, id))
 
-                # Compute similarity for the batch
+            return embeddings
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = [executor.submit(process_cluster, score) for score in top_scores]
+            for future in futures:
+                embeddings = future.result()
                 for embedding, id in embeddings:
                     query_dot_embedding = embedding.dot(query.T) / (
                         np.linalg.norm(embedding) * np.linalg.norm(query)
