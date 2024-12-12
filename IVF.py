@@ -45,7 +45,7 @@ class IVF:
         print("Training complete. Clusters created.")
         return
         
-    def retrieve(self, query, top_k, index_path=None, batch_size=100):
+    def retrieve(self, query, top_k, index_path=None, batch_size=10000):
         self.centroids = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)        
 
 
