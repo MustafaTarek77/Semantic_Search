@@ -8,7 +8,7 @@ ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
 NCLUSTERS = 5000
 NPROBS = 47
-BATCH_SIZE = 30000
+BATCH_SIZE = 40000
 
 class VecDB:
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "Databases/10000000", new_db = True, db_size = None) -> None:
