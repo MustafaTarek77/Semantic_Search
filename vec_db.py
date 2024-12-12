@@ -8,6 +8,7 @@ ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
 NCLUSTERS = 500
 NPROBS = 20
+BATCH_SIZE = 30000
 
 class VecDB:
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "Databases/1000000", new_db = True, db_size = None) -> None:
@@ -64,7 +65,7 @@ class VecDB:
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
         ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
 
-        return ivf.retrieve(query,top_k,index_path=self.index_path)
+        return ivf.retrieve(query,top_k,index_path=self.index_path, batch_size=BATCH_SIZE)
 
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)
