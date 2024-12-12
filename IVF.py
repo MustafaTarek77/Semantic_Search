@@ -72,9 +72,7 @@ class IVF:
             for i in range(0, len(vec_indexes), batch_size):
                 batch = vec_indexes[i:i+batch_size]
                 embeddings = []
-                for id in batch:
-                    embedding = read_one_embedding(self.original_data_path, id, self.dimension)
-                    embeddings.append((embedding, id))
+                embeddings = read_embeddings(self.original_data_path, batch, self.dimension)
 
                 # Compute similarity for the batch
                 for embedding, id in embeddings:

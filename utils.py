@@ -76,10 +76,24 @@ def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_
             yield struct.unpack('i', packed_data)[0]
 
 
-def read_one_embedding(original_data_path, row_id, vec_size):
+def read_embeddings(original_data_path, ids, vec_size):
+    """
+    Reads multiple embedding vectors from disk in a single I/O operation.
+
+    Args:
+        original_data_path (str): Path to the binary file containing embeddings.
+        ids (list[int]): List of row IDs to read.
+        vec_size (int): Size of each embedding vector.
+
+    Returns:
+        list[tuple[np.ndarray, int]]: List of tuples containing the embedding and corresponding ID.
+    """
+    embeddings = []
     with open(original_data_path, 'rb') as file:
-        position = row_id * (vec_size * 4)
-        file.seek(position)
-        packed_data = file.read(vec_size * 4)
-        embedding = struct.unpack(f'{vec_size}f', packed_data)
-    return np.array(embedding, dtype=np.float32)
+        for row_id in ids:
+            position = row_id * (vec_size * 4)  # Calculate position for each ID
+            file.seek(position)
+            packed_data = file.read(vec_size * 4)
+            embedding = struct.unpack(f'{vec_size}f', packed_data)
+            embeddings.append((np.array(embedding, dtype=np.float32), row_id))
+    return embeddings
