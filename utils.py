@@ -56,37 +56,30 @@ def read_centroids_file(centroids_file_path, vec_size):
 
 
 def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
-    with open(clusters_file_path, 'rb') as cluster_file:
-        with open(cluster_begin_file_path, 'rb') as pos_file:
-            start_pos = cluster_id * 4
-            pos_file.seek(start_pos) 
-            start_packed_data = pos_file.read(4)
-            start = struct.unpack('i',start_packed_data)[0]
+    with open(clusters_file_path, 'rb') as cluster_file, open(cluster_begin_file_path, 'rb') as pos_file:
+        start_pos = cluster_id * 4
+        pos_file.seek(start_pos)
+        start = struct.unpack('i', pos_file.read(4))[0]
 
-            if (cluster_id + 1 < n_clusters):
-                end_pos = (cluster_id + 1) * 4
-                pos_file.seek(end_pos) 
-                end_packed_data = pos_file.read(4)
-                end = struct.unpack('i',end_packed_data)[0]
-            else:
-                end = data_size
+        if cluster_id + 1 < n_clusters:
+            end_pos = (cluster_id + 1) * 4
+            pos_file.seek(end_pos)
+            end = struct.unpack('i', pos_file.read(4))[0]
+        else:
+            end = data_size
 
-            vec_indexes=[]
-            cluster_file.seek(start * 4)
-            while cluster_file.tell() < (end * 4):
-                packed_data = cluster_file.read(4)
-                if packed_data == b'':
-                    break
-                data = struct.unpack('i', packed_data)[0]
-                vec_indexes.append(data)
+        cluster_file.seek(start * 4)
+        while cluster_file.tell() < (end * 4):
+            packed_data = cluster_file.read(4)
+            if not packed_data:
+                break
+            yield struct.unpack('i', packed_data)[0]
 
-    return vec_indexes
 
-def read_one_embedding(original_data_path,row_id,vec_size):
+def read_one_embedding(original_data_path, row_id, vec_size):
     with open(original_data_path, 'rb') as file:
-        position = row_id * (vec_size*4)
+        position = row_id * (vec_size * 4)
         file.seek(position)
         packed_data = file.read(vec_size * 4)
-        embedding= struct.unpack(f'{vec_size}f', packed_data)
-            
+        embedding = struct.unpack(f'{vec_size}f', packed_data)
     return np.array(embedding, dtype=np.float32)

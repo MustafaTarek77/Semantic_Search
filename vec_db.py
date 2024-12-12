@@ -10,7 +10,7 @@ NCLUSTERS = 500
 NPROBS = 5
 
 class VecDB:
-    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "saved_db_1m", new_db = True, db_size = None) -> None:
+    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "Databases/1000000", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
         self.db_size= db_size

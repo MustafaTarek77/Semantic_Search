@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 import os
 from utils import *
+import heapq
 
 class IVF:
     def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
@@ -43,21 +44,52 @@ class IVF:
 
         print("Training complete. Clusters created.")
         return
-    
-    def retrieve(self, query,top_k, index_path=None):
+        
+    def retrieve(self, query, top_k, index_path=None, batch_size=100):
         self.centroids = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)        
-        query_dot_centroids = np.argsort(self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids) * np.linalg.norm(query))).squeeze().tolist()[::-1]
-       
+
+
+        # Compute similarities with centroids
+        query_dot_centroids = np.argsort(
+            self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids, axis=1) * np.linalg.norm(query))
+        ).squeeze().tolist()[::-1]
+
         top_scores = query_dot_centroids[:self.n_probs]
 
-        top_k_embeddings = []
+        # Use a min-heap to store only the top-k embeddings
+        heap = []
+
         for score in top_scores:
-            vec_indexes = read_one_cluster(score, os.path.join(index_path, self.clusters_file_path), os.path.join(index_path, self.cluster_start_pos_file_path), self.n_clusters,self.data_size)            
-            for id in vec_indexes:
-                embedding = read_one_embedding(self.original_data_path,id,self.dimension)
-                query_dot_embedding = embedding.dot(query.T) / (np.linalg.norm(embedding) * np.linalg.norm(query))
-                top_k_embeddings.append((query_dot_embedding,id))
-        result = sorted(top_k_embeddings, reverse=True)[:top_k]
+            vec_indexes = list(read_one_cluster(
+                score,
+                os.path.join(index_path, self.clusters_file_path),
+                os.path.join(index_path, self.cluster_start_pos_file_path),
+                self.n_clusters,
+                self.data_size
+            ))
+
+            # Process in batches
+            for i in range(0, len(vec_indexes), batch_size):
+                batch = vec_indexes[i:i+batch_size]
+                embeddings = []
+                for id in batch:
+                    embedding = read_one_embedding(self.original_data_path, id, self.dimension)
+                    embeddings.append((embedding, id))
+
+                # Compute similarity for the batch
+                for embedding, id in embeddings:
+                    query_dot_embedding = embedding.dot(query.T) / (
+                        np.linalg.norm(embedding) * np.linalg.norm(query)
+                    )
+
+                    # Push to heap
+                    if len(heap) < top_k:
+                        heapq.heappush(heap, (query_dot_embedding, id))
+                    else:
+                        heapq.heappushpop(heap, (query_dot_embedding, id))
+
+        # Extract sorted results from the heap
+        result = sorted(heap, reverse=True)
         ids = [score[1] for score in result]
 
         return ids
