@@ -7,7 +7,7 @@ DB_SEED_NUMBER = 42
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
 NCLUSTERS = 20000
-NPROBS = 90
+NPROBS = 85
 BATCH_SIZE = 30000
 
 class VecDB:
