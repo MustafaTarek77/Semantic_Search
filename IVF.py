@@ -56,7 +56,7 @@ class IVF:
         ).squeeze().tolist()[::-1]
 
         top_scores = query_dot_centroids[:self.n_probs]
-        del query_dot_centroids
+        
         # Use a min-heap to store only the top-k embeddings
         heap = []
 
@@ -86,12 +86,16 @@ class IVF:
                         heapq.heappush(heap, (query_dot_embedding, id))
                     else:
                         heapq.heappushpop(heap, (query_dot_embedding, id))
-                    del query_dot_embedding
+                    
 
         # Extract sorted results from the heap
         result = sorted(heap, reverse=True)
         ids = [score[1] for score in result]
+        del query_dot_embedding
         del result
+        del query_dot_centroids
+        del heap
+        del top_scores
         gc.collect()
 
         return ids
