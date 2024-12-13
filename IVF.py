@@ -46,7 +46,7 @@ class IVF:
         print("Training complete. Clusters created.")
         return
         
-    def retrieve(self, query, top_k, index_path=None, batch_size=None, chunk_size=20):
+    def retrieve(self, query, top_k, index_path=None, batch_size=None, chunk_size=500):
         centroids_file_path = os.path.join(index_path, self.centroids_file_path)
         heap = []
 
