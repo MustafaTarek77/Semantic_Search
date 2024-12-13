@@ -3,6 +3,7 @@ from sklearn.cluster import KMeans
 import os
 from utils import *
 import heapq
+import gc
 
 class IVF:
     def __init__(self, original_data_path: str, n_clusters: int, n_probs: int, dimension: int, data_size: int):
@@ -55,7 +56,7 @@ class IVF:
         ).squeeze().tolist()[::-1]
 
         top_scores = query_dot_centroids[:self.n_probs]
-
+        del query_dot_centroids
         # Use a min-heap to store only the top-k embeddings
         heap = []
 
@@ -73,7 +74,7 @@ class IVF:
                 batch = vec_indexes[i:i+batch_size]
                 embeddings = []
                 embeddings = read_embeddings(self.original_data_path, batch, self.dimension)
-
+                del vec_indexes
                 # Compute similarity for the batch
                 for embedding, id in embeddings:
                     query_dot_embedding = embedding.dot(query.T) / (
@@ -85,9 +86,12 @@ class IVF:
                         heapq.heappush(heap, (query_dot_embedding, id))
                     else:
                         heapq.heappushpop(heap, (query_dot_embedding, id))
+                    del query_dot_embedding
 
         # Extract sorted results from the heap
         result = sorted(heap, reverse=True)
         ids = [score[1] for score in result]
+        del result
+        gc.collect()
 
         return ids
