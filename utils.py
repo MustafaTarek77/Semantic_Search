@@ -40,20 +40,17 @@ def write_clusters_file(clusters, clusters_file_path, cluster_begin_file_path):
     return 
 
 
-def read_centroids_file(centroids_file_path, vec_size):
-    centroids = []
+def read_centroids_file_in_chunks(centroids_file_path, vec_size, chunk_size):
     with open(centroids_file_path, 'rb') as file:
         while True:
-            packed_data = file.read(vec_size * 4)
-
+            packed_data = file.read(vec_size * 4 * chunk_size)
             if packed_data == b'':
                 break
 
-            data = struct.unpack(f'{vec_size}f', packed_data)
-            centroids.append(data)
-            del data
-
-    return np.array(centroids)
+            num_vectors = len(packed_data) // (vec_size * 4)
+            data = struct.unpack(f'{num_vectors * vec_size}f', packed_data)
+            centroids = np.array(data).reshape(num_vectors, vec_size)
+            yield centroids
 
 
 def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
