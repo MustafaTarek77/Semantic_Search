@@ -46,45 +46,56 @@ class IVF:
         print("Training complete. Clusters created.")
         return
         
-    def retrieve(self, query, top_k, index_path=None, batch_size=None, chunk_size=500):
-        centroids_file_path = os.path.join(index_path, self.centroids_file_path)
+    def retrieve(self, query, top_k, index_path=None, batch_size=None):
+        centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
+        self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
+
+        # Compute similarities with centroids
+        query_dot_centroids = np.argsort(
+            self.centroids.dot(query.T).T / (np.linalg.norm(self.centroids, axis=1) * np.linalg.norm(query))
+        ).squeeze().tolist()[::-1]
+
+        top_scores = query_dot_centroids[:self.n_probs]
+        
+        # Use a min-heap to store only the top-k embeddings
         heap = []
 
-        # Process centroids in chunks
-        for centroids_chunk in read_centroids_file_in_chunks(centroids_file_path, self.dimension, chunk_size):
-            # Compute similarities with centroids in the current chunk
-            query_dot_centroids = np.argsort(
-                centroids_chunk.dot(query.T).T / (np.linalg.norm(centroids_chunk, axis=1) * np.linalg.norm(query))
-            ).squeeze().tolist()[::-1]
+        for score in top_scores:
+            vec_indexes = list(read_one_cluster(
+                score,
+                os.path.join(index_path, self.clusters_file_path),
+                os.path.join(index_path, self.cluster_start_pos_file_path),
+                self.n_clusters,
+                self.data_size
+            ))
 
-            # Process top scores in the current chunk
-            for score in query_dot_centroids[:self.n_probs]:
-                vec_indexes = list(read_one_cluster(
-                    score,
-                    os.path.join(index_path, self.clusters_file_path),
-                    os.path.join(index_path, self.cluster_start_pos_file_path),
-                    self.n_clusters,
-                    self.data_size
-                ))
+            # Process in batches
+            for i in range(0, len(vec_indexes), batch_size):
+                batch = vec_indexes[i:i+batch_size]
+                embeddings = []
+                embeddings = read_embeddings(self.original_data_path, batch, self.dimension)
+                del vec_indexes
+                # Compute similarity for the batch
+                for embedding, id in embeddings:
+                    query_dot_embedding = embedding.dot(query.T) / (
+                        np.linalg.norm(embedding) * np.linalg.norm(query)
+                    )
 
-                # Process embeddings in batches
-                for i in range(0, len(vec_indexes), batch_size):
-                    batch = vec_indexes[i:i+batch_size]
-                    embeddings = read_embeddings(self.original_data_path, batch, self.dimension)
+                    # Push to heap
+                    if len(heap) < top_k:
+                        heapq.heappush(heap, (query_dot_embedding, id))
+                    else:
+                        heapq.heappushpop(heap, (query_dot_embedding, id))
+                    
 
-                    # Compute similarity for the batch and maintain the heap
-                    for embedding, id in embeddings:
-                        query_dot_embedding = embedding.dot(query.T) / (
-                            np.linalg.norm(embedding) * np.linalg.norm(query)
-                        )
-
-                        if len(heap) < top_k:
-                            heapq.heappush(heap, (query_dot_embedding, id))
-                        else:
-                            heapq.heappushpop(heap, (query_dot_embedding, id))
-            
         # Extract sorted results from the heap
         result = sorted(heap, reverse=True)
         ids = [score[1] for score in result]
+        del query_dot_embedding
+        del result
+        del query_dot_centroids
+        del heap
+        del top_scores
         gc.collect()
+
         return ids
