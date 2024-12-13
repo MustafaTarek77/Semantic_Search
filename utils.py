@@ -50,6 +50,20 @@ def read_centroids_file(centroids_file_path, vec_size):
 
             yield np.array(struct.unpack(f'{vec_size}f', packed_data))
 
+def read_whole_centroids_file(centroids_file_path, vec_size):
+    centroids = []
+    with open(centroids_file_path, 'rb') as file:
+        while True:
+            packed_data = file.read(vec_size * 4)
+
+            if packed_data == b'':
+                break
+
+            data = struct.unpack(f'{vec_size}f', packed_data)
+            centroids.append(data)
+            del data
+
+    return np.array(centroids)
 
 def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
     with open(clusters_file_path, 'rb') as cluster_file, open(cluster_begin_file_path, 'rb') as pos_file:

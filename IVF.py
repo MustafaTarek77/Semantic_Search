@@ -47,8 +47,11 @@ class IVF:
         return
         
     def retrieve(self, query, top_k, index_path=None, batch_size=None):
-        centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
-        self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
+        if self.data_size == 20*10**6:
+            self.centroids = read_whole_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)        
+        else:
+            centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
+            self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
 
         # Compute similarities with centroids
         query_dot_centroids = np.argsort(
