@@ -28,7 +28,7 @@ class VecDB:
         elif self.db_size == 10*10**6:
             self.NCLUSTERS = 10000
             self.NPROBS = 50
-            self.BATCH_SIZE = 1000
+            self.BATCH_SIZE = 5000
         elif self.db_size == 15*10**6:
             self.NCLUSTERS = 15000
             self.NPROBS = 90
