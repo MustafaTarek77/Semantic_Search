@@ -2,19 +2,42 @@ from typing import Dict, List, Annotated
 import numpy as np
 import os
 from IVF import *
+import re
 
 DB_SEED_NUMBER = 42
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
-NCLUSTERS = 10000
-NPROBS = 110
-BATCH_SIZE = 50000
+# NCLUSTERS = 10000
+# NPROBS = 110
+# BATCH_SIZE = 50000
+def extract_db_size(input_string):
+    match = re.search(r'_(\d+)m', input_string)
+    if match:
+        return int(match.group(1)) * 10**6
+    return None  
 
 class VecDB:
-    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "Databases/1000000", new_db = True, db_size = None) -> None:
+    def __init__(self, database_file_path = "saved_db.dat", index_file_path = "saved_db_20m", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
-        self.db_size= db_size
+        self.db_size= extract_db_size(index_file_path)
+        if self.db_size == 10**6:
+            self.NCLUSTERS = 500
+            self.NPROBS = 13
+            self.BATCH_SIZE = 25000
+        elif self.db_size == 10*10**6:
+            self.NCLUSTERS = 5000
+            self.NPROBS = 47
+            self.BATCH_SIZE = 50000
+        elif self.db_size == 15*10**6:
+            self.NCLUSTERS = 7500
+            self.NPROBS = 60
+            self.BATCH_SIZE = 30000
+        elif self.db_size == 20*10**6:
+            self.NCLUSTERS = 10000
+            self.NPROBS = 110
+            self.BATCH_SIZE = 50000
+            
         if new_db:
             if db_size is None:
                 raise ValueError("You need to provide the size of the database")
@@ -63,9 +86,9 @@ class VecDB:
         return np.array(vectors)
     
     def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
+        ivf = IVF(self.db_path,self.NCLUSTERS,self.NPROBS,DIMENSION,self.db_size)
 
-        return ivf.retrieve(query,top_k,index_path=self.index_path, batch_size=BATCH_SIZE)
+        return ivf.retrieve(query,top_k,index_path=self.index_path, batch_size=self.BATCH_SIZE)
 
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)
@@ -75,7 +98,7 @@ class VecDB:
         return cosine_similarity
 
     def _build_index(self):
-        ivf = IVF(self.db_path,NCLUSTERS,NPROBS,DIMENSION,self.db_size)
+        ivf = IVF(self.db_path,self.NCLUSTERS,self.NPROBS,DIMENSION,self.db_size)
         ivf.train()
         
         return
