@@ -23,11 +23,11 @@ class VecDB:
         self.db_size= extract_db_size(index_file_path)
         if self.db_size == 10**6:
             self.NCLUSTERS = 500
-            self.NPROBS = 5
+            self.NPROBS = 13
             self.BATCH_SIZE = 30000
         elif self.db_size == 10*10**6:
             self.NCLUSTERS = 5000
-            self.NPROBS = 10
+            self.NPROBS = 47
             self.BATCH_SIZE = 70000
         elif self.db_size == 15*10**6:
             self.NCLUSTERS = 7500
@@ -36,7 +36,7 @@ class VecDB:
         elif self.db_size == 20*10**6:
             self.NCLUSTERS = 10000
             self.NPROBS = 110
-            self.BATCH_SIZE = 50000
+            self.BATCH_SIZE = 30000
             
         if new_db:
             if db_size is None:
