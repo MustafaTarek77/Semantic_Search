@@ -6,9 +6,9 @@ from IVF import *
 DB_SEED_NUMBER = 42
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
-NCLUSTERS = 10000
-NPROBS = 45
-BATCH_SIZE = 5000
+NCLUSTERS = 7500
+NPROBS = 100
+BATCH_SIZE = 10000
 
 class VecDB:
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "Databases/1000000", new_db = True, db_size = None) -> None:
