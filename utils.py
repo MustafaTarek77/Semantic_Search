@@ -1,6 +1,6 @@
 import numpy as np
 import struct
-
+import random
 
 def read_database(original_data_path, data_size, vec_size):
     data = []
@@ -75,6 +75,24 @@ def read_khra_centroids_file(centroids_file_path, vec_size, batch_size=1000):
             yield np.array(struct.unpack(f'{num_vectors * vec_size}f', packed_data)).reshape(num_vectors, vec_size)
 
 
+def read_fraction_centroids_file(centroids_file_path, vec_size, read_fraction=0.75):
+    total_centroids = 5000  # Fixed number of centroids in the file
+    centroids_to_read = int(total_centroids * read_fraction)
+    
+    # Generate random indices to read
+    selected_indices = sorted(random.sample(range(total_centroids), centroids_to_read))
+    
+    centroids = []
+    with open(centroids_file_path, 'rb') as file:
+        for idx in range(total_centroids):
+            packed_data = file.read(vec_size * 4)  # Read the next centroid
+
+            if idx in selected_indices:
+                data = struct.unpack(f'{vec_size}f', packed_data)
+                centroids.append(data)
+                del data
+
+    return np.array(centroids)
 
 def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
     with open(clusters_file_path, 'rb') as cluster_file, open(cluster_begin_file_path, 'rb') as pos_file:
