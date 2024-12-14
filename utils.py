@@ -113,7 +113,7 @@ def read_whole_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, 
 
     return vec_indexes
 
-def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size, read_fraction=0.5):
+def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size, read_fraction=0.6):
     with open(clusters_file_path, 'rb') as cluster_file:
         with open(cluster_begin_file_path, 'rb') as pos_file:
             # Get the start position of the cluster
