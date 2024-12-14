@@ -70,16 +70,25 @@ class IVF:
         heap = []
 
         for score in top_scores:
-            vec_indexes = list(read_one_cluster(
-                score,
-                os.path.join(index_path, self.clusters_file_path),
-                os.path.join(index_path, self.cluster_start_pos_file_path),
-                self.n_clusters,
-                self.data_size
-            ))
+            if self.data_size == 20*10**6:
+                vec_indexes = list(read_whole_cluster(
+                    score,
+                    os.path.join(index_path, self.clusters_file_path),
+                    os.path.join(index_path, self.cluster_start_pos_file_path),
+                    self.n_clusters,
+                    self.data_size
+                ))
+            else:
+                vec_indexes = list(read_one_cluster(
+                    score,
+                    os.path.join(index_path, self.clusters_file_path),
+                    os.path.join(index_path, self.cluster_start_pos_file_path),
+                    self.n_clusters,
+                    self.data_size
+                ))
 
             # Process in batches
-            for i in range(0, len(vec_indexes), batch_size):
+            for i in range(0, len(vec_indexes), min(batch_size,len(vec_indexes))):
                 batch = vec_indexes[i:i+batch_size]
                 embeddings = []
                 embeddings = read_embeddings(self.original_data_path, batch, self.dimension)

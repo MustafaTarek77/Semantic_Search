@@ -114,6 +114,33 @@ def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_
                 break
             yield struct.unpack('i', packed_data)[0]
 
+def read_whole_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
+    with open(clusters_file_path, 'rb') as cluster_file:
+        with open(cluster_begin_file_path, 'rb') as pos_file:
+            start_pos = cluster_id * 4
+            pos_file.seek(start_pos) 
+            start_packed_data = pos_file.read(4)
+            start = struct.unpack('i',start_packed_data)[0]
+
+            if (cluster_id + 1 < n_clusters):
+                end_pos = (cluster_id + 1) * 4
+                pos_file.seek(end_pos) 
+                end_packed_data = pos_file.read(4)
+                end = struct.unpack('i',end_packed_data)[0]
+            else:
+                end = data_size
+
+            vec_indexes=[]
+            cluster_file.seek(start * 4)
+            while cluster_file.tell() < (end * 4):
+                packed_data = cluster_file.read(4)
+                if packed_data == b'':
+                    break
+                data = struct.unpack('i', packed_data)[0]
+                vec_indexes.append(data)
+
+    return vec_indexes
+
 
 def read_embeddings(original_data_path, ids, vec_size):
     embeddings = []
