@@ -113,7 +113,7 @@ def read_whole_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, 
 
     return vec_indexes
 
-def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
+def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size, read_fraction=0.8):
     with open(clusters_file_path, 'rb') as cluster_file:
         with open(cluster_begin_file_path, 'rb') as pos_file:
             # Get the start position of the cluster
@@ -135,13 +135,13 @@ def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path
             total_indices = end - start
 
             # Randomly select 80% of the indices
-            indices_to_read = int(total_indices * 0.8)
-            selected_indices = sorted(random.sample(range(total_indices), indices_to_read))
+            indices_to_read = int(total_indices * read_fraction)
+            selected_indices = set(random.sample(range(total_indices), indices_to_read))
 
             vec_indexes = []
             cluster_file.seek(start * 4)
 
-            # Read only the selected indices
+            # Read and collect only the selected indices
             for idx in range(total_indices):
                 packed_data = cluster_file.read(4)
                 if idx in selected_indices:
