@@ -65,6 +65,16 @@ def read_whole_centroids_file(centroids_file_path, vec_size):
 
     return np.array(centroids)
 
+def read_khra_centroids_file(centroids_file_path, vec_size, batch_size=10):
+    with open(centroids_file_path, 'rb') as file:
+        while True:
+            packed_data = file.read(vec_size * 4 * batch_size)
+            if not packed_data:
+                break
+            num_vectors = len(packed_data) // (vec_size * 4)
+            yield np.array(struct.unpack(f'{num_vectors * vec_size}f', packed_data)).reshape(num_vectors, vec_size)
+
+
 
 def read_one_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
     with open(clusters_file_path, 'rb') as cluster_file, open(cluster_begin_file_path, 'rb') as pos_file:
