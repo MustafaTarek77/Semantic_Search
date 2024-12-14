@@ -65,7 +65,7 @@ def read_whole_centroids_file(centroids_file_path, vec_size):
 
     return np.array(centroids)
 
-def read_khra_centroids_file(centroids_file_path, vec_size, batch_size=100):
+def read_khra_centroids_file(centroids_file_path, vec_size, batch_size=1000):
     with open(centroids_file_path, 'rb') as file:
         while True:
             packed_data = file.read(vec_size * 4 * batch_size)
