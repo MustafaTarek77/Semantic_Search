@@ -113,6 +113,42 @@ def read_whole_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, 
 
     return vec_indexes
 
+def read_percent_cluster(cluster_id, clusters_file_path, cluster_begin_file_path, n_clusters, data_size):
+    with open(clusters_file_path, 'rb') as cluster_file:
+        with open(cluster_begin_file_path, 'rb') as pos_file:
+            # Get the start position of the cluster
+            start_pos = cluster_id * 4
+            pos_file.seek(start_pos)
+            start_packed_data = pos_file.read(4)
+            start = struct.unpack('i', start_packed_data)[0]
+
+            # Get the end position of the cluster
+            if cluster_id + 1 < n_clusters:
+                end_pos = (cluster_id + 1) * 4
+                pos_file.seek(end_pos)
+                end_packed_data = pos_file.read(4)
+                end = struct.unpack('i', end_packed_data)[0]
+            else:
+                end = data_size
+
+            # Calculate the total number of indices in the cluster
+            total_indices = end - start
+
+            # Randomly select 80% of the indices
+            indices_to_read = int(total_indices * 0.8)
+            selected_indices = sorted(random.sample(range(total_indices), indices_to_read))
+
+            vec_indexes = []
+            cluster_file.seek(start * 4)
+
+            # Read only the selected indices
+            for idx in range(total_indices):
+                packed_data = cluster_file.read(4)
+                if idx in selected_indices:
+                    data = struct.unpack('i', packed_data)[0]
+                    vec_indexes.append(data)
+
+    return vec_indexes
 
 def read_embeddings(original_data_path, ids, vec_size):
     embeddings = []

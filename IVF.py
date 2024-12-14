@@ -66,7 +66,7 @@ class IVF:
 
         for score in top_scores:
             if self.data_size == 20*10**6:
-                vec_indexes = list(read_whole_cluster(
+                vec_indexes = list(read_percent_cluster(
                     score,
                     os.path.join(index_path, self.clusters_file_path),
                     os.path.join(index_path, self.cluster_start_pos_file_path),
