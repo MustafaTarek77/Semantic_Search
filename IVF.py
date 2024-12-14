@@ -51,10 +51,10 @@ class IVF:
             # centroids_generator = read_khra_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension,5000)
             # self.centroids = np.vstack([batch for batch in centroids_generator]) 
 
-            self.centroids= read_whole_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)  
+            # self.centroids= read_whole_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)  
 
-            # centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
-            # self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
+            centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
+            self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
         else:
             centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
             self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
