@@ -48,9 +48,9 @@ class IVF:
         
     def retrieve(self, query, top_k, index_path=None, batch_size=None):
         if self.data_size == 20*10**6 or self.data_size == 10**6:
-            centroids_generator = read_khra_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension,5000)
-            self.centroids = np.vstack([batch for batch in centroids_generator])    
-            # self.centroids= read_whole_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)  
+            # centroids_generator = read_khra_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension,5000)
+            # self.centroids = np.vstack([batch for batch in centroids_generator])    
+            self.centroids= read_whole_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)  
         else:
             centroids_generator = read_centroids_file(os.path.join(index_path, self.centroids_file_path), self.dimension)
             self.centroids = np.array([centroid for centroid in centroids_generator]) # Load centroids
