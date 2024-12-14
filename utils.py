@@ -72,7 +72,7 @@ def read_khra_centroids_file(centroids_file_path, vec_size, batch_size=10):
             if not packed_data:
                 break
             num_vectors = len(packed_data) // (vec_size * 4)
-            yield np.array(struct.unpack(f'{num_vectors * vec_size}f', packed_data)).reshape(num_vectors, vec_size)
+            yield np.array(struct.unpack(f'{num_vectors * vec_size}f', packed_data))
 
 
 
